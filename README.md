@@ -1,6 +1,29 @@
 # buildJetsonTX2Kernel
 Scripts to help build the 4.9.140 kernel and modules onboard the Jetson TX2 (L4T 32.1.0, JetPack 4.2). For previous versions, visit the 'tags' section.
 
+## Procedures
+``` bash
+./getKernelSources.sh
+./makeKernel.sh
+./copyImage.sh
+
+# clone librealsense from official Git
+git checkout <version you want>
+./applyRealsensePatches.sh
+
+# in the librealsense directory
+mkdir build
+cd build
+cmake ../ -DBUILD_EXAMPLES=true -DBUILD_WITH_CUDA=true -DBUILD_WITH_TM2=true
+make -j4
+
+sudo make install
+
+
+sudo cp ../config/99-realsense-libusb.rules /etc/udev/rules.d/99-realsense-libusb.rules && sudo udevadm control --reload-rules && udevadm trigger
+```
+
+
 <em><strong>Note:</strong> The kernel source version must match the version of firmware flashed on the Jetson. For example, the source for the 4.9.140 kernel here is matched with L4T 32.1.0. This kernel compiled using this source tree will not work with newer versions or older versions of L4T, only 32.1.0.</em>
 
 As of this writing, the "official" way to build the Jetson TX2 kernel is to use a cross compiler on a Linux PC. This is an alternative which builds the kernel onboard the Jetson itself. These scripts will download the kernel source to the Jetson TX2, and then compile the kernel and selected modules. The newly compiled kernel can then be installed. The kernel sources and build objects consume ~3GB.
